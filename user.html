@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User • Pelaporan Air & Sanitasi</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">💧</div>
+        <div>
+          <div class="brand__title">User App — Pelaporan Air & Sanitasi</div>
+          <div class="brand__sub">Offline UI (LocalStorage) • <a href="./admin.html">Buka Admin</a></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn--ghost" id="btnSeed">Muat Demo</button>
+        <button class="btn btn--ghost" id="btnReset">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container grid">
+    <!-- MAP -->
+    <section class="card card__pad">
+      <div class="card__head">
+        <div>
+          <h2 class="h2">Peta Laporan</h2>
+          <p class="p">
+            Marker menampilkan status (pending/verified/dll). Konsep alur verifikasi & peta interaktif mengacu pada dokumen.
+            [Source](https://www.genspark.ai/api/files/s/ZisGx7YC)
+          </p>
+        </div>
+
+        <div style="min-width:220px">
+          <label for="mapFilter">Filter Status</label>
+          <select id="mapFilter">
+            <option value="all">Semua</option>
+            <option value="pending">pending</option>
+            <option value="verified">verified</option>
+            <option value="in_progress">in_progress</option>
+            <option value="resolved">resolved</option>
+            <option value="rejected">rejected</option>
+          </select>
+          <div class="hint">Tip: klik peta untuk isi lat/lng.</div>
+        </div>
+      </div>
+
+      <div id="map" class="map"></div>
+
+      <div class="hr"></div>
+      <div class="legend">
+        <div class="legend__item"><span class="dot dot--pending"></span> Pending</div>
+        <div class="legend__item"><span class="dot dot--verified"></span> Verified</div>
+        <div class="legend__item"><span class="dot dot--progress"></span> In Progress</div>
+        <div class="legend__item"><span class="dot dot--resolved"></span> Resolved</div>
+        <div class="legend__item"><span class="dot dot--rejected"></span> Rejected</div>
+      </div>
+    </section>
+
+    <!-- SIDE -->
+    <aside class="row" style="flex-direction:column; gap:14px;">
+      <section class="card card__pad">
+        <div class="card__head">
+          <div>
+            <h2 class="h2">Buat Laporan</h2>
+            <p class="p">Simulasi: foto + GPS + kategori + komentar. [Source](https://www.genspark.ai/api/files/s/ZisGx7YC)</p>
+          </div>
+        </div>
+
+        <form id="reportForm">
+          <div class="grid2">
+            <div class="field">
+              <label for="lat">Latitude</label>
+              <input id="lat" name="lat" type="text" placeholder="-6.200000" required />
+            </div>
+            <div class="field">
+              <label for="lng">Longitude</label>
+              <input id="lng" name="lng" type="text" placeholder="106.816666" required />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <button class="btn" type="button" id="btnGPS">Ambil GPS</button>
+            <button class="btn btn--ghost" type="button" id="btnCenter">Pusatkan</button>
+          </div>
+
+          <div class="field">
+            <label for="category">Kategori Masalah</label>
+            <select id="category" name="category" required>
+              <option value="air_kotor">Air kotor/keruh</option>
+              <option value="air_tidak_tersedia">Air tidak tersedia</option>
+              <option value="pipa_bocor">Pipa bocor</option>
+              <option value="sanitasi_buruk">Sanitasi buruk</option>
+              <option value="lainnya">Lainnya</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="desc">Deskripsi</label>
+            <textarea id="desc" name="description" rows="3" placeholder="Ceritakan kondisi di lapangan..."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="photo">Foto (opsional)</label>
+            <input id="photo" type="file" accept="image/*" />
+            <div class="preview" id="preview"></div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <button class="btn" type="submit">Simpan (Offline)</button>
+            <button class="btn btn--ghost" type="reset" id="btnClearPreview">Bersihkan</button>
+          </div>
+
+          <div class="callout" id="msg"></div>
+        </form>
+      </section>
+
+      <section class="card card__pad">
+        <div class="row row--between">
+          <div>
+            <h2 class="h2">Riwayat Laporan</h2>
+            <p class="p">Data tersimpan lokal di browser.</p>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="kpi__label">Total</div><div class="kpi__value" id="kpiTotal">0</div></div>
+          <div class="kpi"><div class="kpi__label">Pending</div><div class="kpi__value" id="kpiPending">0</div></div>
+          <div class="kpi"><div class="kpi__label">Verified</div><div class="kpi__value" id="kpiVerified">0</div></div>
+        </div>
+
+        <div class="list" id="list"></div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="user.js"></script>
+</body>
+</html>
