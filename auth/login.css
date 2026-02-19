@@ -52,6 +52,7 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -2;
+  pointer-events: none;
   background:
     radial-gradient(ellipse 900px 700px at 5% -15%,  rgba(56,239,212,.22), transparent 65%),
     radial-gradient(ellipse 800px 600px at 98% 5%,   rgba(95,168,255,.18), transparent 60%),
@@ -495,8 +496,6 @@ label {
 .auth__side {
   display: grid;
   gap: 14px;
-  position: sticky;
-  top: 90px;
 }
 
 .side-card {
