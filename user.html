@@ -20,7 +20,6 @@
       </div>
 
       <div class="actions">
-        <button class="btn btn--ghost" id="btnSeed">Muat Demo</button>
         <button class="btn btn--ghost" id="btnReset">Reset</button>
       </div>
     </div>
@@ -63,7 +62,34 @@
         <div class="legend__item"><span class="dot dot--rejected"></span> Rejected</div>
       </div>
     </section>
+<button class="chat-fab" id="chatFab" aria-label="Buka Chatbot" title="Chatbot Edukasi">
+  <span class="chat-fab__icon">💬</span>
+</button>
 
+<section class="chatbot" id="chatbot" aria-hidden="true">
+  <header class="chatbot__head">
+    <div class="chatbot__title">
+      <div class="chatbot__badge">Edukasi</div>
+      <div>
+        <div class="chatbot__h">Chatbot Kesehatan</div>
+        <div class="chatbot__sub">Ibu • Anak • Air Bersih • Sanitasi</div>
+      </div>
+    </div>
+    <div class="chatbot__actions">
+      <button class="btn btn--ghost" type="button" id="chatReset" title="Reset chat">Reset</button>
+      <button class="btn btn--ghost" type="button" id="chatClose" title="Tutup">Tutup</button>
+    </div>
+  </header>
+
+  <div class="chatbot__chips" id="chatChips"></div>
+
+  <div class="chatbot__msgs" id="chatMsgs" role="log" aria-live="polite"></div>
+
+  <form class="chatbot__form" id="chatForm">
+    <input id="chatInput" type="text" placeholder="Tanya: diare, air keruh, ASI, cuci tangan..." autocomplete="off" />
+    <button class="btn" type="submit">Kirim</button>
+  </form>
+</section>
     <!-- SIDE -->
     <aside class="row" style="flex-direction:column; gap:14px;">
       <section class="card card__pad">
@@ -138,36 +164,6 @@
 
         <div class="list" id="list"></div>
       </section>
-
-      <button class="chat-fab" id="chatFab" aria-label="Buka Chatbot" title="Chatbot Edukasi">
-        <span class="chat-fab__icon">💬</span>
-      </button>
-      
-      <section class="chatbot" id="chatbot" aria-hidden="true">
-        <header class="chatbot__head">
-          <div class="chatbot__title">
-            <div class="chatbot__badge">Edukasi</div>
-            <div>
-              <div class="chatbot__h">Chatbot Kesehatan</div>
-              <div class="chatbot__sub">Ibu • Anak • Air Bersih • Sanitasi</div>
-            </div>
-          </div>
-          <div class="chatbot__actions">
-            <button class="btn btn--ghost" type="button" id="chatReset" title="Reset chat">Reset</button>
-            <button class="btn btn--ghost" type="button" id="chatClose" title="Tutup">Tutup</button>
-          </div>
-        </header>
-      
-        <div class="chatbot__chips" id="chatChips"></div>
-      
-        <div class="chatbot__msgs" id="chatMsgs" role="log" aria-live="polite"></div>
-      
-        <form class="chatbot__form" id="chatForm">
-          <input id="chatInput" type="text" placeholder="Tanya: diare, air keruh, ASI, cuci tangan..." autocomplete="off" />
-          <button class="btn" type="submit">Kirim</button>
-        </form>
-      </section>
-
     </aside>
   </main>
 

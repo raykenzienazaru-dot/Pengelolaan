@@ -243,22 +243,11 @@ $("#btnReset").addEventListener("click", ()=>{
   showCallout("Data lokal direset.");
 });
 
-$("#btnSeed").addEventListener("click", ()=>{
-  const demo = [
-    { id:uid(), createdAt:new Date(Date.now()-8*3600e3).toISOString(), lat:-6.2, lng:106.8167, category:"air_kotor", categoryLabel:categoryLabel("air_kotor"), description:"Air sumur keruh dan berbau, beberapa anak diare.", photoDataUrl:null, status:"verified", adminNote:"Perlu cek sumber air." },
-    { id:uid(), createdAt:new Date(Date.now()-30*3600e3).toISOString(), lat:-7.7971, lng:110.3705, category:"sanitasi_buruk", categoryLabel:categoryLabel("sanitasi_buruk"), description:"Drainase tersumbat dekat toilet umum.", photoDataUrl:null, status:"in_progress", adminNote:"Koordinasi dinas." },
-    { id:uid(), createdAt:new Date(Date.now()-3*3600e3).toISOString(), lat:3.5952, lng:98.6722, category:"air_tidak_tersedia", categoryLabel:categoryLabel("air_tidak_tersedia"), description:"Air tidak mengalir sejak kemarin.", photoDataUrl:null, status:"pending", adminNote:"" }
-  ];
-  saveReports([...demo, ...loadReports()]);
-  renderMap(); renderList(); renderKpis();
-  showCallout("Data demo dimuat.");
-});
 
 // init
 renderMap();
 renderList();
 renderKpis();
-
 // ================= CHATBOT (Offline) =================
 const CHAT_LS_KEY = "air_sanitasi_chat_v1";
 
