@@ -258,3 +258,200 @@ $("#btnSeed").addEventListener("click", ()=>{
 renderMap();
 renderList();
 renderKpis();
+
+// ================= CHATBOT (Offline) =================
+const CHAT_LS_KEY = "air_sanitasi_chat_v1";
+
+function loadChat(){
+  try { return JSON.parse(localStorage.getItem(CHAT_LS_KEY) || "[]"); } catch { return []; }
+}
+function saveChat(rows){ localStorage.setItem(CHAT_LS_KEY, JSON.stringify(rows)); }
+
+function nowTime(){
+  return new Date().toLocaleString("id-ID", { dateStyle:"medium", timeStyle:"short" });
+}
+
+function initChatbot(){
+  const fab = document.querySelector("#chatFab");
+  const panel = document.querySelector("#chatbot");
+  const closeBtn = document.querySelector("#chatClose");
+  const resetBtn = document.querySelector("#chatReset");
+  const form = document.querySelector("#chatForm");
+  const input = document.querySelector("#chatInput");
+  const msgs = document.querySelector("#chatMsgs");
+  const chips = document.querySelector("#chatChips");
+  const btnChatTop = document.querySelector("#btnChatTop"); // optional
+
+  const SUGGEST = [
+    { label:"Air keruh/berbau", q:"Air keruh dan berbau, apa yang harus dilakukan?" },
+    { label:"Diare pada anak", q:"Anak diare setelah minum air, langkah awal apa?" },
+    { label:"Cuci tangan", q:"Kapan waktu cuci tangan yang benar?" },
+    { label:"Sanitasi rumah", q:"Apa ciri sanitasi buruk dan cara perbaikannya?" },
+    { label:"Ibu hamil", q:"Tips kesehatan ibu hamil terkait air bersih?" },
+    { label:"ASI & bayi", q:"ASI eksklusif itu sampai kapan?" },
+  ];
+
+  function openChat(){
+    panel.setAttribute("aria-hidden", "false");
+    input.focus();
+  }
+  function closeChat(){
+    panel.setAttribute("aria-hidden", "true");
+  }
+
+  function renderChips(){
+    chips.innerHTML = SUGGEST.map(x => `<button class="chip" type="button" data-q="${escapeHtml(x.q)}">${escapeHtml(x.label)}</button>`).join("");
+    chips.querySelectorAll("[data-q]").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        input.value = b.dataset.q;
+        form.dispatchEvent(new Event("submit", { cancelable:true, bubbles:true }));
+      });
+    });
+  }
+
+  function addBubble(role, text){
+    const row = { role, text, t: new Date().toISOString() };
+    const hist = loadChat();
+    hist.push(row);
+    saveChat(hist);
+    draw(row);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function draw(row){
+    const mine = row.role === "me";
+    const el = document.createElement("div");
+    el.className = "bubble " + (mine ? "bubble--me" : "bubble--bot");
+    el.innerHTML = `
+      <div>${escapeHtml(row.text).replace(/\n/g,"<br/>")}</div>
+      <div class="bubble__meta">${escapeHtml(mine ? "Kamu" : "Chatbot")} • ${escapeHtml(nowTime())}</div>
+    `;
+    msgs.appendChild(el);
+  }
+
+  function boot(){
+    renderChips();
+
+    msgs.innerHTML = "";
+    const hist = loadChat();
+    if (!hist.length){
+      addBubble("bot",
+`Halo! Aku chatbot edukasi kesehatan ibu & anak serta air bersih/sanitasi.
+Kamu bisa tanya soal: air keruh, diare, cuci tangan, sanitasi rumah, ibu hamil, bayi/ASI.`);
+      return;
+    }
+    hist.forEach(draw);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function normalize(s=""){
+    return s.toLowerCase().trim();
+  }
+
+  function answer(qRaw){
+    const q = normalize(qRaw);
+
+    // Intent: diare/penyakit akibat air
+    if (/(diare|mencret|muntah|dehidrasi)/.test(q)){
+      return (
+`Kalau anak diare (terutama setelah konsumsi air/makanan):
+1) Pastikan minum cukup: berikan oralit bila ada.
+2) Pantau tanda bahaya: lemas sekali, mata cekung, tidak mau minum, darah pada feses, demam tinggi → segera ke faskes.
+3) Cek sumber air: gunakan air matang untuk minum & buat susu/MPASI.
+4) Cuci tangan pakai sabun sebelum makan & setelah BAB.`
+      );
+    }
+
+    // Intent: air keruh/berbau/tercemar
+    if (/(air.*(keruh|bau|kotor)|sumur.*keruh|air.*kuning|air.*hitam)/.test(q)){
+      return (
+`Jika air keruh/berbau:
+1) Jangan langsung diminum. Prioritaskan air kemasan/air matang untuk konsumsi.
+2) Endapkan & saring untuk pemakaian non-minum (mandi/cuci) bila terpaksa.
+3) Rebus sampai mendidih untuk minum (lebih aman dibanding hanya disaring).
+4) Laporkan titik lokasi lewat form (foto + GPS) agar bisa diverifikasi/ditindaklanjuti.`
+      );
+    }
+
+    // Intent: cuci tangan
+    if (/(cuci tangan|ctps|sabun|handwash)/.test(q)){
+      return (
+`Waktu penting cuci tangan pakai sabun:
+- Sebelum makan/menyiapkan makanan
+- Setelah BAB/bersihkan anak BAB
+- Setelah dari toilet, setelah memegang sampah/selokan
+- Sebelum menyusui/menyiapkan susu/MPASI
+Durasi: gosok minimal 20 detik, bilas bersih.`
+      );
+    }
+
+    // Intent: sanitasi/drainase/toilet
+    if (/(sanitasi|toilet|jamban|selokan|drainase|septik)/.test(q)){
+      return (
+`Ciri sanitasi bermasalah: bau menyengat, genangan, selokan tersumbat, toilet kotor, limbah mengalir ke sumber air.
+Langkah cepat:
+1) Hindari anak bermain di genangan/selokan.
+2) Bersihkan sumbatan (aman), tutup genangan.
+3) Pastikan jamban/septik tidak bocor.
+4) Laporkan lokasi + foto agar bisa masuk tindak lanjut.`
+      );
+    }
+
+    // Intent: ibu hamil
+    if (/(ibu hamil|hamil|kehamilan)/.test(q)){
+      return (
+`Untuk ibu hamil: air bersih penting untuk mencegah infeksi pencernaan/penyakit akibat air.
+- Minum air matang/aman
+- Jaga kebersihan makanan & alat makan
+- Segera periksa bila diare berkepanjangan, muntah berat, demam, atau lemas.`
+      );
+    }
+
+    // Intent: bayi/ASI
+    if (/(asi|bayi|mpasi|susu formula)/.test(q)){
+      return (
+`Terkait bayi/ASI:
+- ASI eksklusif umumnya sampai 6 bulan, lalu MPASI + lanjut ASI.
+- Jika pakai susu/MPASI, gunakan air matang yang aman dan alat yang bersih untuk mencegah diare.`
+      );
+    }
+
+    return (
+`Aku belum menangkap pertanyaannya. Kamu bisa pilih salah satu topik cepat di atas, atau tulis kata kunci seperti:
+“air keruh”, “diare”, “cuci tangan”, “sanitasi”, “ibu hamil”, “ASI”.`
+    );
+  }
+
+  // Events
+  fab.addEventListener("click", ()=>{
+    const hidden = panel.getAttribute("aria-hidden") === "true";
+    hidden ? openChat() : closeChat();
+  });
+  closeBtn.addEventListener("click", closeChat);
+  if (btnChatTop) btnChatTop.addEventListener("click", openChat);
+
+  resetBtn.addEventListener("click", ()=>{
+    localStorage.removeItem(CHAT_LS_KEY);
+    boot();
+  });
+
+  form.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    addBubble("me", text);
+    input.value = "";
+
+    // simple typing delay
+    setTimeout(()=>{
+      addBubble("bot", answer(text));
+    }, 250);
+  });
+
+  // init
+  panel.setAttribute("aria-hidden", "true");
+  boot();
+}
+
+// panggil setelah init UI utama
+initChatbot();
