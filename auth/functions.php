@@ -1,52 +1,63 @@
 <?php
-declare(strict_types=1);
-require_once __DIR__ . "/config.php";
+// auth/functions.php
 
-function csrf_token(): string {
-  if (empty($_SESSION["csrf"])) {
-    $_SESSION["csrf"] = bin2hex(random_bytes(32));
-  }
-  return $_SESSION["csrf"];
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-function csrf_verify(?string $token): void {
-  if (!$token || empty($_SESSION["csrf"]) || !hash_equals($_SESSION["csrf"], $token)) {
-    http_response_code(403);
-    exit("CSRF token tidak valid.");
-  }
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'laporan_sanitasi');
+
+function getDB(): PDO {
+    static $pdo = null;
+    if ($pdo === null) {
+        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+        $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
+    }
+    return $pdo;
 }
 
-function auth_user(): ?array {
-  return $_SESSION["auth"] ?? null;
+function isLoggedIn(): bool {
+    return isset($_SESSION['user_id']);
 }
 
-function require_login(?string $role = null): void {
-  $u = auth_user();
-  if (!$u) {
-    header("Location: /auth/login.php");
-    exit;
-  }
-  if ($role && ($u["role"] ?? "") !== $role) {
-    http_response_code(403);
-    exit("Akses ditolak.");
-  }
+/**
+ * Panggil di awal setiap halaman yang butuh login.
+ * $role = 'admin' | 'user' | null (semua role boleh)
+ */
+function require_login(string $role = null): void {
+    if (!isLoggedIn()) {
+        header("Location: auth/login.php");
+        exit;
+    }
+    if ($role !== null && $_SESSION['user_role'] !== $role) {
+        // Arahkan ke halaman sesuai role mereka
+        if ($_SESSION['user_role'] === 'admin') {
+            header('Location: admin.php'); exit;
+        } else {
+            header('Location: user.php'); exit;
+        }
+    }
 }
 
-function redirect_by_role(string $role): void {
-  if ($role === "admin") {
-    header("Location: /admin/index.php");
-  } else {
-    header("Location: /user/index.php");
-  }
-  exit;
+// Alias camelCase (untuk kompatibilitas)
+function requireLogin(string $redirect = 'auth/login.php'): void {
+    if (!isLoggedIn()) {
+        header("Location: $redirect");
+        exit;
+    }
 }
 
-function flash_set(string $msg, string $type = "error"): void {
-  $_SESSION["flash"] = ["msg" => $msg, "type" => $type];
-}
-
-function flash_get(): ?array {
-  $f = $_SESSION["flash"] ?? null;
-  unset($_SESSION["flash"]);
-  return $f;
+function currentUser(): array {
+    return [
+        'id'    => $_SESSION['user_id']    ?? null,
+        'nama'  => $_SESSION['user_nama']  ?? '',
+        'role'  => $_SESSION['user_role']  ?? '',
+        'email' => $_SESSION['user_email'] ?? '',
+    ];
 }
