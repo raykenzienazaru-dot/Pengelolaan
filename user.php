@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . "/../auth/functions.php";
+require_login("user");
+?>
 <!doctype html>
 <html lang="id">
 <head>
